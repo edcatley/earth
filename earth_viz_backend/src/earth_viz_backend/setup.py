@@ -10,11 +10,11 @@ from pathlib import Path
 import sys
 
 
-def download_static_files():
+def setup():
     """Download static planet images and monthly earth textures from GitHub release"""
     
     # Download to user's home directory
-    static_dir = Path.home() / ".earth_viz" / "static_images"
+    static_dir = Path.home() / ".globe-server" / "static_images"
     
     print("=" * 60)
     print("Earth-Viz Static Files Setup")
@@ -104,4 +104,4 @@ def download_static_files():
 
 
 if __name__ == "__main__":
-    download_static_files()
+    setup()

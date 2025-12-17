@@ -12,7 +12,7 @@ import asyncio
 from pathlib import Path
 
 from .earth_viz_api import create_earth_viz_router
-from .earth_control import create_earth_control_router
+from .earth_control import create_earth_control_router, earth_ws_manager
 from .services.cloud_scheduler import scheduler
 
 # Configure logging
@@ -22,14 +22,14 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     """
     Create the FastAPI application with all earth-viz functionality
-    All paths auto-detected from ~/.earth_viz/
+    All paths auto-detected from ~/.globe-server/
     
     Returns:
         FastAPI: Configured application
     """
     
     from pathlib import Path
-    static_images_dir = Path.home() / ".earth_viz" / "static_images"
+    static_images_dir = Path.home() / ".globe-server" / "static_images"
     
     logger.info(f"Using static images from: {static_images_dir}")
     
@@ -75,6 +75,7 @@ def create_app() -> FastAPI:
     async def shutdown():
         logger.info("Stopping earth-viz services...")
         await scheduler.stop()
+        await earth_ws_manager.reset()
         logger.info("Earth-viz services stopped")
     
     return app
@@ -82,6 +83,11 @@ def create_app() -> FastAPI:
 def run_server():
     """Console script entry point for running the standalone server"""
     import uvicorn
+    import logging
+    
+    # Enable debug logging for watchfiles to see what's changing
+    logging.getLogger('watchfiles').setLevel(logging.DEBUG)
+    
     app = create_app()
     uvicorn.run(
         app,

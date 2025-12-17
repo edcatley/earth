@@ -19,8 +19,8 @@ from .earth_control import earth_ws_manager
 import tempfile
 
 # Hardcoded paths
-STATIC_IMAGES_DIR = Path.home() / ".earth_viz" / "static_images"
-OUTPUT_DIR = Path.home() / ".earth_viz" / "images"
+STATIC_IMAGES_DIR = Path.home() / ".globe-server" / "static_images"
+OUTPUT_DIR = Path.home() / ".globe-server" / "images"
 RESOLUTION = "2048x1024"
 # Configure logging
 logger = logging.getLogger(__name__)

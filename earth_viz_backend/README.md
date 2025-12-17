@@ -38,7 +38,7 @@ The package requires high-resolution planet textures (~300MB). Download them onc
 earth-viz-setup
 ```
 
-This downloads static images to `~/.earth_viz/static_images/`
+This downloads static images to `~/.globe-server/static_images/`
 
 ### Start Server
 ```bash
@@ -166,7 +166,7 @@ API documentation available at:
 
 ## File Locations
 
-- Static images: `~/.earth_viz/static_images/`
-- Generated clouds: `~/.earth_viz/images/`
+- Static images: `~/.globe-server/static_images/`
+- Generated clouds: `~/.globe-server/images/`
 - Package source: `src/earth_viz_backend/`
 - Frontend app: `src/earth_viz_backend/static/`

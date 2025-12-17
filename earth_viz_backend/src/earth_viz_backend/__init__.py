@@ -27,7 +27,8 @@ from .earth_control import (
     enable_full_screen,
     disable_full_screen,
     get_status,
-    await_earth_connection
+    await_earth_connection,
+    reset_earth_connection
 )
 
 
@@ -56,5 +57,6 @@ __all__ = [
     "enable_full_screen",
     "disable_full_screen",
     "get_status",
-    "await_earth_connection"
+    "await_earth_connection",
+    "reset_earth_connection"
 ]

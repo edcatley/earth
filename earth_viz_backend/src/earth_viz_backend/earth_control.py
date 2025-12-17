@@ -15,14 +15,15 @@ class EarthWebSocketManager:
     """Manages WebSocket connections to Earth frontend clients"""
     def __init__(self):
         self.active_connections: List[WebSocket] = []
-        self.connection_event = asyncio.Event()  
+        self.connection_event = asyncio.Event()
+        self.connection_generation = 0  # Track reset cycles
 
         
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
         self.connection_event.set()  
-        logger.info(f"Earth client connected. Total connections: {len(self.active_connections)}")
+        logger.info(f"Earth client connected (gen {self.connection_generation}). Total connections: {len(self.active_connections)}")
     
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
@@ -31,12 +32,42 @@ class EarthWebSocketManager:
             self.connection_event.clear()  
         logger.info(f"Earth client disconnected. Total connections: {len(self.active_connections)}")
     
+    async def reset(self):
+        """Close all connections and reset the manager"""
+        self.connection_generation += 1
+        logger.info(f"Resetting WebSocket manager (gen {self.connection_generation})...")
+        
+        for connection in self.active_connections[:]:  # Copy list to avoid modification during iteration
+            try:
+                await connection.close()
+            except Exception as e:
+                logger.debug(f"Error closing connection: {e}")
+        self.active_connections.clear()
+        self.connection_event.clear()
+        
+        # Wait a moment for connections to fully close on client side
+        await asyncio.sleep(0.5)
+        logger.info(f"WebSocket manager reset complete (gen {self.connection_generation})")
+    
     async def wait_for_connection(self, timeout: float = 30.0):  
         """Wait for at least one client to connect"""
+        start_gen = self.connection_generation
+        
+        # Clear the event first to ensure we wait for a NEW connection
+        self.connection_event.clear()
+        logger.info(f"Waiting for new connection (gen {start_gen})...")
+        
         try:
             await asyncio.wait_for(self.connection_event.wait(), timeout=timeout)
-            return True
+            # Verify we got a NEW connection after the reset, not a stale one
+            if self.active_connections:
+                logger.info(f"Connection detected (gen {self.connection_generation})")
+                return True
+            else:
+                logger.warning("Connection event set but no active connections")
+                return False
         except asyncio.TimeoutError:
+            logger.warning(f"Timeout waiting for connection (gen {start_gen})")
             return False
     
     async def send_command_to_earth(self, command: str, params: List[Any] = None):
@@ -52,16 +83,20 @@ class EarthWebSocketManager:
         }
         
         disconnected = []
-        for connection in self.active_connections:
+        for connection in self.active_connections[:]:  # Copy to avoid modification during iteration
             try:
                 await connection.send_text(json.dumps(message))
             except Exception as e:
-                logger.error(f"Failed to send command to client: {e}")
+                logger.warning(f"Failed to send command to client (marking as disconnected): {e}")
                 disconnected.append(connection)
         
         # Remove disconnected clients
         for conn in disconnected:
             self.disconnect(conn)
+        
+        # Check if we still have connections after cleanup
+        if not self.active_connections:
+            raise HTTPException(status_code=503, detail="All Earth clients disconnected during send")
         
         return {
             "status": "sent",
@@ -167,6 +202,11 @@ async def get_status():
 async def await_earth_connection(timeout: float = 30.0) -> bool:
     """Wait for earth-viz frontend to connect. Returns True if connected, False if timeout."""
     return await earth_ws_manager.wait_for_connection(timeout)
+
+async def reset_earth_connection():
+    """Reset all WebSocket connections. Call this before restarting earth-viz."""
+    await earth_ws_manager.reset()
+    return {"status": "reset", "message": "All connections closed"}
 
 
 def create_earth_control_router() -> APIRouter:

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 RESOLUTION = "2048x1024"
 CLOUD_BASE_URL = f"https://clouds.matteason.co.uk/images/{RESOLUTION}"
-PLANETS_DIR = Path.home() / ".earth_viz"/ "static_images" / "planets" / f"{RESOLUTION}"
+PLANETS_DIR = Path.home() / ".globe-server"/ "static_images" / "planets" / f"{RESOLUTION}"
 
 class CloudScheduler:
     def __init__(self, interval_minutes: int = 180):

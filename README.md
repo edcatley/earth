@@ -103,11 +103,11 @@ await set_planet_mode("mars")
 
 ## Data Storage
 
-All earth-viz data is stored in `~/.earth_viz/`:
+All earth-viz data is stored in `~/.globe-server/`:
 
-- **Static images**: `~/.earth_viz/static_images/` - Planet textures (downloaded via `earth-viz-setup`)
-- **Generated clouds**: `~/.earth_viz/images/` - Real-time cloud imagery
-- **Temp files**: `~/.earth_viz/tmp/` - Satellite image downloads
+- **Static images**: `~/.globe-server/static_images/` - Planet textures (downloaded via `earth-viz-setup`)
+- **Generated clouds**: `~/.globe-server/images/` - Real-time cloud imagery
+- **Temp files**: `~/.globe-server/tmp/` - Satellite image downloads
 
 No manual configuration required.
 
