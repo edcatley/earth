@@ -116,8 +116,14 @@ class CloudScheduler:
             
             logger.info("Cloud images downloaded successfully!")
 
+        except httpx.ConnectError:
+            logger.warning("No internet access - skipping cloud image download. Existing images will be used if available.")
+        except httpx.TimeoutException:
+            logger.warning("Cloud image download timed out. Will retry at next scheduled interval.")
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Cloud image server returned an error: {e.response.status_code}")
         except Exception as e:
-            logger.error(f"Error downloading cloud images: {e}", exc_info=True)
+            logger.error(f"Unexpected error downloading cloud images: {e}")
         finally:
             self.generation_in_progress = False
             
